@@ -1,0 +1,72 @@
+#Création d’un modèle à base d’une séquence de couches--------------------------------
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers, models
+model = models.Sequential()
+model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(180, 180,3)))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.Flatten())
+model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(3,activation = "softmax"))
+model.summary()
+#pour compiler le modèle CNN 
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+              metrics=['accuracy'])
+#pour lire le dataset « train » : on fait la même chose pour les dataset « test » et « validation »
+train_path="images/dataset/train"
+x_train=[]
+for folder in os.listdir(train_path):
+    sub_path=train_path+"/"+folder
+    for img in os.listdir(sub_path):
+        image_path=sub_path+"/"+img
+        img_arr=cv2.imread(image_path)
+        img_arr=cv2.resize(img_arr,(180,180))
+        x_train.append(img_arr)
+train_x=np.array(x_train)
+train_x=train_x/255.0
+train_datagen = ImageDataGenerator(rescale = 1./255)
+training_set = train_datagen.flow_from_directory(train_path,
+                                                 target_size = (180, 180),
+                                                 batch_size = 3,
+                                                 class_mode = 'categorical')
+train_y=training_set.classes
+training_set.class_indices
+train_y.shape,test_y.shape,val_y.shape
+# lancer l’entrainement du modèle CNN 
+history = model.fit(
+  train_x,
+  train_y,
+  validation_data=(val_x,val_y),
+  epochs=10,
+  batch_size=3)
+#Evaluation des modèles Deep Learning---------------------------------------------------
+plt.plot(history.history['accuracy'], label='train acc')
+plt.plot(history.history['val_accuracy'], label='val acc')
+plt.legend()
+plt.show()
+plt.plot(history.history['loss'], label='train loss')
+plt.plot(history.history['val_loss'], label='val loss')
+plt.plot(history.history['accuracy'], label='accuracy')
+plt.plot(history.history['val_accuracy'], label='val-accuracy')
+plt.legend()
+plt.show()
+model.evaluate(test_x,test_y,batch_size=32)
+y_pred=model.predict(test_x)
+y_pred=np.argmax(y_pred,axis=1)
+print(classification_report(y_pred,test_y))
+print(confusion_matrix(y_pred,test_y))
+#Transfert Learning--------------------------------------------------------------------
+vgg = VGG19(input_shape=(224,224,3), weights='imagenet', include_top=False)
+# ne pas entrainer les couches pré-entrainées de VGG-19
+for layer in vgg.layers:
+    layer.trainable = False
+x = Flatten()(vgg.output)
+# ajout d'une couche de sortie
+prediction = Dense(3, activation='softmax')(x)
+model = Model(inputs=vgg.input, outputs=prediction)
+model.summary()
+
