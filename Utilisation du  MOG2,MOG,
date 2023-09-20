@@ -1,0 +1,36 @@
+#MOG2----------------------------------------------------------
+ import cv2
+cap = cv2.VideoCapture(0)
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+# initializing subtractor
+fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
+if (cap.isOpened()== False):
+    print("erreur d'ouverture de vidéo")
+while(cap.isOpened()):
+    ret, frame = cap.read()
+    # applying on each frame
+    fgmask = fgbg.apply(frame)
+    fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
+    cv2.imshow('frame', frame)
+    cv2.imshow('GMG', fgmask)
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        break
+cap.release()
+cv2.destroyAllWindows()
+#MOG------------------------------------------------------------
+import cv2
+cap = cv2.VideoCapture(0)
+# initializing subtractor
+fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
+if (cap.isOpened()== False): 
+  print("erreur d'ouverture de vidéo")
+while(cap.isOpened()):
+    ret, frame = cap.read()
+    # applying on each frame
+    fgmask = fgbg.apply(frame)
+    cv2.imshow('frame', frame)
+    cv2.imshow('MOG', fgmask)
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        break
+cap.release()
+cv2.destroyAllWindows()
